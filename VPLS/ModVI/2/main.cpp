@@ -1,15 +1,21 @@
 #include <iostream>
+#include <set>
+
+class UninitializedIndex
+{
+};
+class NegativeIndex
+{
+};
+class InvalidIndex
+{
+};
 
 template <class T, int N>
 class BoundedArray
 {
 public:
-  class UninitializedIndex{};
-  class NegativeIndex {};
-  class InvalidIndex{};
-
-  void
-  set(int index, T value)
+  void set(int index, T value)
   {
     if (index >= N)
       throw InvalidIndex();
@@ -18,13 +24,18 @@ public:
       throw NegativeIndex();
 
     buf[index] = value;
+    if (indexes.find(index) == indexes.end())
+      indexes.insert(index);
   }
   T get(int index)
   {
     if (index < 0)
       throw NegativeIndex();
 
-    if (!buf[index])
+    if (index >= N)
+      throw InvalidIndex();
+
+    if (indexes.find(index) == indexes.end())
       throw UninitializedIndex();
 
     return buf[index];
@@ -32,6 +43,7 @@ public:
 
 private:
   T buf[N];
+  std::set<int> indexes;
 };
 
 template <class T>
@@ -64,7 +76,7 @@ void testArray()
     {
       std::cerr << "Erro: indice negativo." << std::endl;
     }
-    catch (UninitializedIndex)
+    catch (InvalidIndex)
     {
       std::cerr << "Erro: indice maior que arranjo." << std::endl;
     }
