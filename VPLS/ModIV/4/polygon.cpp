@@ -20,20 +20,37 @@ bool operator==(const Polygon &lhs, const Polygon &rhs)
   // TODO: implement this method.
   std::vector<Point> left(lhs);
   std::vector<Point> right(rhs);
-  int size = left.size() < right.size() ? left.size() : right.size();
-  int count = 0;
-  for (auto i : left)
+  int size = left.size() > right.size() ? left.size() : right.size();
+
+  int firstIteration = 0;
+  for (Point i : left)
   {
-    for (auto j : right)
+    for (Point j : right)
     {
-      if (i == j)
+      if (i.contains(j))
       {
-        count++;
+        firstIteration++;
         break;
       }
     }
   }
-  return count == size;
+  int secondtIteration = 0;
+  for (auto i : right)
+  {
+    for (auto j : left)
+    {
+      if (i.contains(j))
+      {
+        secondtIteration++;
+        break;
+      }
+    }
+  }
+  if (size == 1)
+  {
+    std::cout << lhs << ", " << rhs;
+  }
+  return (firstIteration == size && firstIteration == secondtIteration);
 }
 
 bool Point::contains(const Point &p) const
@@ -50,16 +67,28 @@ std::ostream &operator<<(std::ostream &out, const Point &p)
 bool RightRectangle::contains(const Point &p) const
 {
   // TODO: implement this method.
-  return false;
+  Point begin = limits[0];
+  Point end = limits[2];
+  return p.x >= begin.x && p.x <= end.x &&
+         p.y >= begin.y && p.y <= end.y;
 }
 
-Point::Point(int xx, int yy) : x(xx), y(yy) {}
+Point::Point(int xx, int yy) : x(xx), y(yy)
+{
+  limits.push_back(*this);
+}
 
 RightRectangle::RightRectangle(int x0, int y0, int x1, int y1)
 {
   // TODO: implement this method.
-  Point p0(x0, y0);
-  Point p1(x1, y1);
-  limits.push_back(p0);
-  limits.push_back(p1);
+  int smallerX = x0 < x1 ? x0 : x1;
+  int smallerY = y0 < y1 ? y0 : y1;
+
+  int greaterX = x0 > x1 ? x0 : x1;
+  int greaterY = y0 > y1 ? y0 : y1;
+
+  limits.push_back(Point(smallerX, smallerY));
+  limits.push_back(Point(smallerX, greaterY));
+  limits.push_back(Point(greaterX, greaterY));
+  limits.push_back(Point(greaterX, smallerY));
 }
